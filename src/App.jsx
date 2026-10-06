@@ -9,11 +9,8 @@ export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-
-  // Estado para armazenar a tecnologia selecionada no filtro
   const [filtroTech, setFiltroTech] = useState("Todas");
 
-  // Lista inicial de demonstração
   const projetosIniciais = [
     {
       id: 1,
@@ -35,13 +32,11 @@ export default function App() {
     }
   ];
 
-  // Carrega do localStorage ou usa os projetos iniciais
   const [projetos, setProjetos] = useState(() => {
     const salvos = localStorage.getItem('meus_projetos');
     return salvos ? JSON.parse(salvos) : projetosIniciais;
   });
 
-  // Salva no localStorage sempre que a lista muda
   useEffect(() => {
     localStorage.setItem('meus_projetos', JSON.stringify(projetos));
   }, [projetos]);
@@ -56,64 +51,72 @@ export default function App() {
     }
   };
 
-  // 1. Pega todas as tecnologias únicas cadastradas nos projetos
   const todasTecnologias = [
     "Todas",
     ...Array.from(new Set(projetos.flatMap(p => p.tecnologias || [])))
   ];
 
-  // 2. Filtra os projetos com base no botão clicado
   const projetosFiltrados = filtroTech === "Todas"
     ? projetos
     : projetos.filter(p => p.tecnologias && p.tecnologias.includes(filtroTech));
 
   return (
-    <div className="min-h-screen bg-slate-50 text-gray-900 flex flex-col">
+    <div className="min-h-screen bg-slate-50/50 text-slate-800 flex flex-col font-sans antialiased">
       <Navbar 
         usuarioLogado={usuario} 
         onOpenLogin={() => setIsLoginOpen(true)} 
         onLogout={() => setUsuario(null)}
       />
 
-      <main className="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
-        <section className="text-center py-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-3">
-            Plataforma de Portfólio
+      {/* ÁREA HERO / CABEÇALHO COM GRADIENTE */}
+      <section className="bg-gradient-to-b from-blue-50/60 via-slate-50/30 to-transparent border-b border-slate-200/50 py-12 md:py-16">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full mb-4 tracking-wide uppercase">
+            Portfólio & Projetos
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+            Desenvolvimento & Soluções Web
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Monitorize, exiba e partilhe os seus projetos de desenvolvimento numa interface moderna e responsiva.
+          <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+            Exibição modular de projetos, experimentos e sistemas desenvolvidos com foco em usabilidade, performance e código limpo.
           </p>
 
           {usuario && (
-            <div className="mt-6">
+            <div className="mt-8">
               <button 
                 onClick={() => setIsFormOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-md transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
               >
                 + Adicionar Novo Projeto
               </button>
             </div>
           )}
-        </section>
+        </div>
+      </section>
 
-        <section id="projetos" className="my-8">
+      {/* CONTEÚDO PRINCIPAL / LISTA */}
+      <main className="max-w-6xl mx-auto px-4 py-10 flex-grow w-full">
+        <section id="projetos">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-2xl font-bold text-gray-800">Projetos em Destaque</h2>
-            <span className="text-sm text-gray-500 font-medium">
-              Exibindo: {projetosFiltrados.length} de {projetos.length} projetos
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Projetos em Destaque</h2>
+              <p className="text-xs text-slate-500 mt-1">Filtre por tecnologia para explorar os trabalhos.</p>
+            </div>
+            <span className="text-xs text-slate-500 font-semibold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+              {projetosFiltrados.length} de {projetos.length} projetos
             </span>
           </div>
 
-          {/* BARRA DE FILTROS POR TECNOLOGIA */}
-          <div className="flex flex-wrap gap-2 mb-8">
+          {/* BARRINHA DE FILTROS ESTILIZADA */}
+          <div className="flex flex-wrap gap-2 mb-8 bg-slate-200/50 p-1.5 rounded-xl w-fit border border-slate-200/60">
             {todasTecnologias.map((tech) => (
               <button
                 key={tech}
                 onClick={() => setFiltroTech(tech)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   filtroTech === tech
-                    ? 'bg-blue-600 text-white shadow-sm scale-105'
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-white text-blue-600 shadow-sm font-bold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
                 {tech}
@@ -121,10 +124,10 @@ export default function App() {
             ))}
           </div>
 
-          {/* LISTA DE CARDS FILTRADA */}
+          {/* GRID DE CARDS */}
           {projetosFiltrados.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
-              <p className="text-gray-500">Nenhum projeto encontrado com a tecnologia "{filtroTech}".</p>
+            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
+              <p className="text-slate-500 font-medium">Nenhum projeto encontrado para a tecnologia "{filtroTech}".</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -132,11 +135,10 @@ export default function App() {
                 <div key={proj.id} className="relative group">
                   <ProjectCard projeto={proj} />
                   
-                  {/* Botão de apagar projeto (apenas visível quando autenticado) */}
                   {usuario && (
                     <button
                       onClick={() => handleRemoveProject(proj.id)}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-2 rounded-full shadow-lg transition-transform transform hover:scale-105"
+                      className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-2 rounded-full shadow-lg transition-transform transform hover:scale-110 z-10"
                       title="Remover Projeto"
                     >
                       🗑️
@@ -149,14 +151,12 @@ export default function App() {
         </section>
       </main>
 
-      {/* Modal de Autenticação */}
       <LoginModal 
         isOpen={isLoginOpen} 
         onClose={() => setIsLoginOpen(false)}
         onLoginSuccess={(userData) => setUsuario(userData)}
       />
 
-      {/* Modal de Novo Projeto */}
       {isFormOpen && (
         <ProjectForm 
           onAddProject={handleAddProject}
@@ -164,7 +164,6 @@ export default function App() {
         />
       )}
 
-      {/* Rodapé do site */}
       <Footer />
     </div>
   );
