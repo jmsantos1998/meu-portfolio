@@ -10,6 +10,9 @@ export default function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  // Estado para armazenar a tecnologia selecionada no filtro
+  const [filtroTech, setFiltroTech] = useState("Todas");
+
   // Lista inicial de demonstração
   const projetosIniciais = [
     {
@@ -53,6 +56,17 @@ export default function App() {
     }
   };
 
+  // 1. Pega todas as tecnologias únicas cadastradas nos projetos
+  const todasTecnologias = [
+    "Todas",
+    ...Array.from(new Set(projetos.flatMap(p => p.tecnologias || [])))
+  ];
+
+  // 2. Filtra os projetos com base no botão clicado
+  const projetosFiltrados = filtroTech === "Todas"
+    ? projetos
+    : projetos.filter(p => p.tecnologias && p.tecnologias.includes(filtroTech));
+
   return (
     <div className="min-h-screen bg-slate-50 text-gray-900 flex flex-col">
       <Navbar 
@@ -83,31 +97,55 @@ export default function App() {
         </section>
 
         <section id="projetos" className="my-8">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h2 className="text-2xl font-bold text-gray-800">Projetos em Destaque</h2>
             <span className="text-sm text-gray-500 font-medium">
-              Total: {projetos.length} projetos
+              Exibindo: {projetosFiltrados.length} de {projetos.length} projetos
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projetos.map(proj => (
-              <div key={proj.id} className="relative group">
-                <ProjectCard projeto={proj} />
-                
-                {/* Botão de apagar projeto (apenas visível quando autenticado) */}
-                {usuario && (
-                  <button
-                    onClick={() => handleRemoveProject(proj.id)}
-                    className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-2 rounded-full shadow-lg transition-transform transform hover:scale-105"
-                    title="Remover Projeto"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
+          {/* BARRA DE FILTROS POR TECNOLOGIA */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {todasTecnologias.map((tech) => (
+              <button
+                key={tech}
+                onClick={() => setFiltroTech(tech)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  filtroTech === tech
+                    ? 'bg-blue-600 text-white shadow-sm scale-105'
+                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {tech}
+              </button>
             ))}
           </div>
+
+          {/* LISTA DE CARDS FILTRADA */}
+          {projetosFiltrados.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <p className="text-gray-500">Nenhum projeto encontrado com a tecnologia "{filtroTech}".</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projetosFiltrados.map(proj => (
+                <div key={proj.id} className="relative group">
+                  <ProjectCard projeto={proj} />
+                  
+                  {/* Botão de apagar projeto (apenas visível quando autenticado) */}
+                  {usuario && (
+                    <button
+                      onClick={() => handleRemoveProject(proj.id)}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold p-2 rounded-full shadow-lg transition-transform transform hover:scale-105"
+                      title="Remover Projeto"
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
